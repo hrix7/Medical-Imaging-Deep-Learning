@@ -37,10 +37,11 @@ Python, PyTorch, U-Net, UPerNet, ResNet-101, Faster R-CNN, ResNet50-FPN, NumPy, 
 
 ## Author and Project Setting
 
-**Hritika Adhikary**  
-Graduate Medical Image Analysis Project, Arizona State University  
-Faculty Advisor: Dr. Jianming Liang  
-Fall 2025
+**Author:** Hritika Adhikary  
+**Project:** Graduate Medical Image Analysis Project  
+**Institution:** Arizona State University  
+**Faculty Advisor:** Dr. Jianming Liang  
+**Period:** Fall 2025
 
 ## Rights
 
