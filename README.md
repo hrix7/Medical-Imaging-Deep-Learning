@@ -35,9 +35,12 @@ The classification CSV must contain `target` and `prediction` columns. Dataset-s
 
 Python, PyTorch, U-Net, UPerNet, ResNet-101, Faster R-CNN, ResNet50-FPN, NumPy, OpenCV, DICOM, SLURM, CUDA.
 
-## Author
+## Author and Project Setting
 
-Hritika Adhikary - M.S. Biomedical Engineering, Arizona State University.
+**Hritika Adhikary**  
+Graduate Medical Image Analysis Project, Arizona State University  
+Faculty Advisor: Dr. Jianming Liang  
+Fall 2025
 
 ## Rights
 
