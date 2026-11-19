@@ -1,0 +1,43 @@
+name: Chest X-ray data checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 14 * * *'
+permissions:
+  contents: read
+concurrency:
+  group: cxr-checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Full test suite
+        run: python -m pytest -q
+      - name: Generate and independently repeat synthetic audit
+        run: |
+          mkdir -p outputs
+          python scripts/build_cxr_fixture.py data/synthetic-cxr
+          python -m src.cxr_manifest data/synthetic-cxr/manifest.csv --source data/synthetic-cxr/source.json --data-root data/synthetic-cxr > outputs/synthetic-cxr-audit.json
+          python scripts/build_cxr_fixture.py data/synthetic-cxr-repeat
+          python -m src.cxr_manifest data/synthetic-cxr-repeat/manifest.csv --source data/synthetic-cxr-repeat/source.json --data-root data/synthetic-cxr-repeat > outputs/repeated-audit.json
+          cmp outputs/synthetic-cxr-audit.json outputs/repeated-audit.json
+      - name: Upload synthetic-only audit
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: synthetic-cxr-manifest-audit
+          path: outputs/synthetic-cxr-audit.json
+          if-no-files-found: error
+          retention-days: 7

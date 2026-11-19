@@ -1,2 +1,5 @@
 numpy>=1.26,<3
 pytest>=8,<9
+
+Pillow==11.3.0
+pandas>=2.2,<3

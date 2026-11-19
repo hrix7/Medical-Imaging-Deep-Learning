@@ -46,3 +46,9 @@ Python, PyTorch, U-Net, UPerNet, ResNet-101, Faster R-CNN, ResNet50-FPN, NumPy, 
 ## Rights
 
 Copyright (c) 2026 Hritika Adhikary. All rights reserved. See [LICENSE](LICENSE).
+
+## New chest X-ray data foundation
+
+A separate reproducible data-integrity pipeline now validates local grayscale PNG/JPEG manifests, explicit label states, patient/study split separation and exact file/decoded-pixel duplicates. It generates original geometric fixtures for testing; no patient images, training results or new disease-performance claims are included.
+
+Start with [setup and schema](docs/CHEST_XRAY_PIPELINE.md), [dataset audit](docs/DATASET_AUDIT.md) and the [development backlog](DEVELOPMENT_BACKLOG.md). Run `python -m pytest -q` before pushing. Daily GitHub Actions run read-only synthetic validation; the portfolio development schedule continues this chest X-ray track.
