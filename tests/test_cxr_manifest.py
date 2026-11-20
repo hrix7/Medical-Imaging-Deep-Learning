@@ -44,7 +44,7 @@ def test_study_cannot_belong_to_two_patients_even_within_split(fixture):
     assert 'study_assigned_to_multiple_patients' in codes(run(fixture))
 
 def test_multiple_distinct_views_same_patient_and_study_within_split_allowed(fixture):
-    values=rows(fixture);values[1].update(patient_id=values[0]['patient_id'],study_id=values[0]['study_id'],split='train');write_rows(fixture,values)
+    values=rows(fixture);values[1].update(patient_id=values[0]['patient_id'],study_id=values[0]['study_id'],split='train',label=values[0]['label']);write_rows(fixture,values)
     assert run(fixture)['passed']
 
 def test_duplicate_bytes_under_different_names_and_ids(fixture):
@@ -121,3 +121,25 @@ def test_cli_success_leakage_and_schema_exit_codes(fixture):
     bad=subprocess.run(command,capture_output=True,text=True);assert bad.returncode==1;assert not json.loads(bad.stdout)['passed']
     (fixture/'manifest.csv').write_text('bad header\n')
     invalid=subprocess.run(command,capture_output=True,text=True);assert invalid.returncode==2;assert not invalid.stdout;assert 'no identifiers' in invalid.stderr
+
+@pytest.mark.parametrize('labels,conflict', [
+    (('positive','negative'),True), (('negative','positive'),True),
+    (('positive','uncertain'),False), (('negative','missing'),False),
+    (('uncertain','missing'),False), (('positive','positive'),False)])
+def test_study_label_consistency_preserves_unknown_states(fixture,labels,conflict):
+    values=rows(fixture)
+    values[1].update(patient_id=values[0]['patient_id'],study_id=values[0]['study_id'],split='train')
+    for row,label in zip(values,labels):row['label']=label
+    write_rows(fixture,values)
+    report=run(fixture)
+    assert ('study_conflicting_definitive_labels' in codes(report)) == conflict
+    assert report['passed'] == (not conflict)
+    if conflict:
+        assert {'code':'study_conflicting_definitive_labels','rows':[2,3]} in report['issues']
+    else:
+        for label in labels:assert report['split_label_counts']['train'][label] >= 1
+
+def test_different_studies_same_patient_may_have_different_labels(fixture):
+    values=rows(fixture);values[1].update(patient_id=values[0]['patient_id'],split='train')
+    values[0]['label']='positive';values[1]['label']='negative';write_rows(fixture,values)
+    assert run(fixture)['passed']

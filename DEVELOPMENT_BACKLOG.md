@@ -6,6 +6,10 @@
 - Original geometric fixture generator, full tests and read-only pinned-action daily/push/PR CI with repeat-audit verification.
 - Repository/dataset inventory and official-source candidate review in docs/DATASET_AUDIT.md. No real-data acquisition or disease-performance claims.
 
+## Completed — 2026-11-20
+
+- Study-level definitive-label conflict review gate, seven additional boundary tests and refreshed six-repository dataset inventory. Unknown states preserved; different studies may differ.
+
 ## Ordered next work
 
 1. Select an authorized chest X-ray release, complete terms/access/checksum/label review and implement a tested dataset-specific manifest adapter preserving official patient splits and uncertainty/missing states.

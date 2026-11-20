@@ -98,6 +98,7 @@ def audit(manifest: Path, source: Path, data_root: Path, *, max_pixels=16_777_21
     issues, quality = [], []
     groups = {k: defaultdict(list) for k in ('image_id', 'patient_id', 'study_id', 'file_sha256', 'pixel_sha256')}
     inspections = []
+    study_labels = defaultdict(list)
     counts = {split: Counter({label: 0 for label in LABELS}) for split in SPLITS}
     def issue(code, indices):
         issues.append(dict(code=code, rows=sorted(indices)))
@@ -109,6 +110,7 @@ def audit(manifest: Path, source: Path, data_root: Path, *, max_pixels=16_777_21
         if row['split'] not in SPLITS or row['view'] not in VIEWS or row['label'] not in LABELS:
             issue('invalid_split_view_or_label', [index]); continue
         counts[row['split']][row['label']] += 1
+        study_labels[row['study_id']].append((index, row['label']))
         for key in ('image_id', 'patient_id', 'study_id'):
             groups[key][row[key]].append((index, row['split'], row['patient_id']))
         try:
@@ -133,6 +135,10 @@ def audit(manifest: Path, source: Path, data_root: Path, *, max_pixels=16_777_21
                 issue(key + '_cross_split_leakage', indices)
             if key in ('file_sha256', 'pixel_sha256') and len(records) > 1:
                 issue('duplicate_' + key.removesuffix('_sha256'), indices)
+    for records in study_labels.values():
+        definitive = [(index, label) for index, label in records if label in ('positive', 'negative')]
+        if len({label for _, label in definitive}) > 1:
+            issue('study_conflicting_definitive_labels', [index for index, _ in definitive])
     issues.sort(key=lambda i: (i['code'], i['rows']))
     return dict(schema_version=1, data_kind=meta['data_kind'], target_name=meta['target_name'],
                 passed=not issues, training_readiness='not_assessed', rows=len(rows), decoded_images=len(inspections),
